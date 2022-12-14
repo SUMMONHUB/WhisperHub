@@ -1,0 +1,161 @@
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Window = Library.CreateLib("SUMMON HUB | BLOXFRUIT", "Midnight")
+local Tab = Window:NewTab("Main")
+local Section = Tab:NewSection("Auto Farm")
+
+local Weaponlist = {}
+local Weapon = nil
+
+for i,v in pairs(game:GetService("Players").LocalPlayer.Backpack:GetChildren()) do
+    table.insert(Weaponlist,v.Name)
+end
+
+ConfigSection:CreateDropdown("Select Weapon", "", "", Weaponlist, function(d)
+   Weapon = d
+end)
+
+Section:NewToggle("Auto Equip", "?", function(e)
+AutoEquiped = e
+end)
+
+spawn(function()
+while wait() do
+if AutoEquiped then
+pcall(function()
+game.Players.LocalPlayer.Character.Humanoid:EquipTool(game:GetService("Players").LocalPlayer.Backpack:FindFirstChild(Weapon))
+end)
+end
+end
+end)
+
+Section:NewToggle("Auto Farm", "?", function(a)
+_G.Farm = a
+function CheckQuest()
+   local Lv = game.Players.LocalPlayer.Data.Level.Value
+    if Lv == 1 or Lv <= 9999 then
+    Ms = "Bandit [Lv. 5]"
+    NM = "Bandit"
+    LQ = 1
+    NQ = "BanditQuest1"
+    CQ = CFrame.new(1059.0523681640625, 16.424299240112305, 1547.887451171875)
+    end
+end
+
+
+function TP(P)
+    Distance = (P.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+    if Distance < 10 then
+        Speed = 1000
+    elseif Distance < 170 then
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = P
+        Speed = 350
+    elseif Distance < 1000 then
+        Speed = 350
+    elseif Distance >= 1000 then
+        Speed = 300
+    end
+    game:GetService("TweenService"):Create(
+        game.Players.LocalPlayer.Character.HumanoidRootPart,
+        TweenInfo.new(Distance/Speed, Enum.EasingStyle.Linear),
+        {CFrame = P}
+    ):Play()
+end
+
+spawn(function()
+   while task.wait() do
+       if _G.Farm then
+           CheckQuest()
+           if game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == false then
+                TP(CQ)
+                wait(0.9)
+                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest",NQ,LQ)
+                elseif game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == true then
+                    for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                        if v.Name == Ms then
+                        TP(v.HumanoidRootPart.CFrame * CFrame.new(0,20,0))
+                        v.HumanoidRootPart.Size = Vector3.new(60,60,60)
+                    end
+                end
+            end
+        end
+    end
+end)
+end)
+
+Section:NewToggle("FastAttack", "?", function(b)
+(getgenv()).Config = {
+ ["FastAttack"] = b,
+ ["ClickAttack"] = b
+} 
+
+coroutine.wrap(function()
+local StopCamera = require(game.ReplicatedStorage.Util.CameraShaker)StopCamera:Stop()
+    for v,v in pairs(getreg()) do
+        if typeof(v) == "function" and getfenv(v).script == game:GetService("Players").LocalPlayer.PlayerScripts.CombatFramework then
+             for v,v in pairs(debug.getupvalues(v)) do
+                if typeof(v) == "table" then
+                    spawn(function()
+                        game:GetService("RunService").RenderStepped:Connect(function()
+                            if getgenv().Config['FastAttack'] then
+                                 pcall(function()
+                                     v.activeController.timeToNextAttack = -(math.huge^math.huge^math.huge)
+                                     v.activeController.attacking = false
+                                     v.activeController.increment = 4
+                                     v.activeController.blocking = false   
+                                     v.activeController.hitboxMagnitude = 150
+    		                         v.activeController.humanoid.AutoRotate = true
+    	                      	     v.activeController.focusStart = 0
+    	                      	     v.activeController.currentAttackTrack = 0
+                                     sethiddenproperty(game:GetService("Players").LocalPlayer, "SimulationRaxNerous", math.huge)
+                                 end)
+                             end
+                         end)
+                    end)
+                end
+            end
+        end
+    end
+end)();
+
+spawn(function()
+    game:GetService("RunService").RenderStepped:Connect(function()
+        if getgenv().Config['ClickAttack'] then
+             pcall(function()
+                game:GetService'VirtualUser':CaptureController()
+			    game:GetService'VirtualUser':Button1Down(Vector2.new(0,1,0,1))
+            end)
+        end
+    end)
+end)
+end)
+
+Section:NewToggle("Bring Mob", "?", function(c)
+_G.bringmob = c
+while _G.bringmob do wait()
+    pcall(function()
+for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+for x,y in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+if v.Name == "Bandit [Lv. 5]" then
+    if y.Name == "Bandit [Lv. 5]" then
+   v.HumanoidRootPart.CFrame = y.HumanoidRootPart.CFrame
+   v.HumanoidRootPart.Size = Vector3.new(60,60,60)
+   y.HumanoidRootPart.Size = Vector3.new(60,60,60)
+   v.HumanoidRootPart.Transparency = 1
+   v.HumanoidRootPart.CanCollide = false
+   y.HumanoidRootPart.CanCollide = false
+   v.Humanoid.WalkSpeed = 0
+   y.Humanoid.WalkSpeed = 0
+   v.Humanoid.JumpPower = 0
+   y.Humanoid.JumpPower = 0
+   if sethiddenproperty then
+     sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+end
+end
+end
+end
+end
+end)
+end
+end)
+
+
